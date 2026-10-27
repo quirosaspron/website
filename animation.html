@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Interactive convolution receptive-field animation." />
+    <title>Receptive field animation</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=20261024-m" />
+    <style>
+      :root {
+        --background: #ebe8e0;
+        --ink: #151515;
+        --line: rgba(21, 21, 21, .25);
+        --cell: clamp(27px, 3vw, 42px);
+        --gap: 4px;
+      }
+      * { box-sizing: border-box; }
+      html, body { min-height: 100%; margin: 0; }
+      body { background: var(--background); }
+      button { font: inherit; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+      .stage { position: relative; display: flex; align-items: center; justify-content: center; gap: clamp(72px, 10vw, 150px); min-height: 100svh; padding: 32px; overflow: hidden; }
+      .connector { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+      .connector path { fill: none; stroke: var(--ink); stroke-width: 1.5; opacity: .38; }
+      .connector circle { fill: var(--ink); opacity: .55; }
+      .matrix-frame { position: relative; z-index: 1; flex: 0 0 auto; padding: 16px; border: 1px solid var(--line); background: var(--background); }
+      .matrix { position: relative; display: grid; gap: var(--gap); }
+      .input-grid { grid-template-columns: repeat(9, var(--cell)); }
+      .output-grid { grid-template-columns: repeat(7, var(--cell)); }
+      .input-cell, .output-cell { display: block; width: var(--cell); height: var(--cell); border: 1px solid rgba(21, 21, 21, .11); background: rgba(21, 21, 21, var(--tone, .07)); }
+      .input-cell { transition: background 180ms ease, border-color 180ms ease; }
+      .input-cell.is-active { background: rgba(21, 21, 21, .68); border-color: rgba(21, 21, 21, .35); }
+      .receptive-window { position: absolute; top: 0; left: 0; z-index: 2; border: 2px solid var(--ink); background: rgba(21, 21, 21, .06); box-shadow: 0 0 0 5px rgba(21, 21, 21, .045); pointer-events: none; transition: transform 340ms cubic-bezier(.2, .7, .18, 1); }
+      .output-cell { padding: 0; border-radius: 0; appearance: none; cursor: crosshair; transition: background 150ms ease, border-color 150ms ease, transform 150ms ease; }
+      .output-cell:hover { border-color: var(--ink); }
+      .output-cell.is-active { background: var(--ink); border-color: var(--ink); transform: scale(1.08); }
+      .output-cell:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+      @media (max-width: 800px) {
+        :root { --cell: clamp(22px, 5vw, 32px); }
+        .stage { flex-direction: column; gap: clamp(48px, 7vh, 80px); padding: 24px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .input-cell, .output-cell, .receptive-window { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage" id="stage" aria-labelledby="page-title">
+      <h1 class="sr-only" id="page-title">Convolution receptive field</h1>
+      <p class="sr-only" id="instructions">Move across the output cells to highlight each corresponding 3 by 3 area in the input grid. Arrow keys work when an output cell has focus.</p>
+      <svg class="connector" id="connector" aria-hidden="true"><path id="connection-path"></path><circle id="connection-start" r="3"></circle><circle id="connection-end" r="3"></circle></svg>
+      <div class="matrix-frame" aria-label="Nine by nine input grid"><div class="matrix input-grid" id="input-grid" aria-hidden="true"></div></div>
+      <div class="matrix-frame" aria-label="Seven by seven output feature map"><div class="matrix output-grid" id="output-grid" role="group" aria-describedby="instructions"></div></div>
+    </main>
+    <script>
+      (() => {
+        const inputSize = 9;
+        const outputSize = 7;
+        const windowSize = 3;
+        const inputGrid = document.querySelector('#input-grid');
+        const outputGrid = document.querySelector('#output-grid');
+        const stage = document.querySelector('#stage');
+        const connector = document.querySelector('#connector');
+        const path = document.querySelector('#connection-path');
+        const startDot = document.querySelector('#connection-start');
+        const endDot = document.querySelector('#connection-end');
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const inputCells = [];
+        const outputCells = [];
+        let activeRow = 3;
+        let activeColumn = 3;
+        let scanIndex = 24;
+        let interacting = false;
+        let connectorFrame = 0;
+
+        for (let row = 0; row < inputSize; row++) {
+          for (let column = 0; column < inputSize; column++) {
+            const cell = document.createElement('span');
+            cell.className = 'input-cell';
+            const wave = (Math.sin(row * .9 + column * .43) + Math.cos(column * .73 - row * .31) + 2) / 4;
+            cell.style.setProperty('--tone', (.045 + wave * .15).toFixed(3));
+            inputGrid.append(cell);
+            inputCells.push(cell);
+          }
+        }
+        const windowOutline = document.createElement('span');
+        windowOutline.className = 'receptive-window';
+        inputGrid.append(windowOutline);
+
+        for (let row = 0; row < outputSize; row++) {
+          for (let column = 0; column < outputSize; column++) {
+            const cell = document.createElement('button');
+            cell.type = 'button';
+            cell.className = 'output-cell';
+            cell.dataset.row = row;
+            cell.dataset.column = column;
+            cell.setAttribute('aria-label', `Output row ${row + 1}, column ${column + 1}; input rows ${row + 1} to ${row + 3}, columns ${column + 1} to ${column + 3}`);
+            cell.setAttribute('aria-pressed', 'false');
+            const wave = (Math.sin(row * .7 - column * .4) + Math.cos(column * .9 + row * .45) + 2) / 4;
+            cell.style.setProperty('--tone', (.06 + wave * .18).toFixed(3));
+            cell.addEventListener('pointerenter', () => select(row, column));
+            cell.addEventListener('focus', () => { interacting = true; select(row, column); });
+            cell.addEventListener('click', () => { interacting = true; select(row, column); });
+            cell.addEventListener('keydown', (event) => {
+              const steps = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
+              const step = steps[event.key];
+              if (!step) return;
+              event.preventDefault();
+              const nextRow = Math.max(0, Math.min(outputSize - 1, row + step[0]));
+              const nextColumn = Math.max(0, Math.min(outputSize - 1, column + step[1]));
+              outputCells[nextRow * outputSize + nextColumn].focus();
+            });
+            outputGrid.append(cell);
+            outputCells.push(cell);
+          }
+        }
+
+        function placeWindow() {
+          const cellWidth = inputCells[0].getBoundingClientRect().width;
+          const gap = parseFloat(getComputedStyle(inputGrid).columnGap);
+          const step = cellWidth + gap;
+          const span = windowSize * cellWidth + (windowSize - 1) * gap;
+          windowOutline.style.width = `${span}px`;
+          windowOutline.style.height = `${span}px`;
+          windowOutline.style.transform = `translate(${activeColumn * step}px, ${activeRow * step}px)`;
+        }
+        function drawConnection() {
+          const stageRect = stage.getBoundingClientRect();
+          const source = windowOutline.getBoundingClientRect();
+          const target = outputCells[activeRow * outputSize + activeColumn].getBoundingClientRect();
+          const x1 = source.right - stageRect.left;
+          const y1 = source.top + source.height / 2 - stageRect.top;
+          const x2 = target.left - stageRect.left;
+          const y2 = target.top + target.height / 2 - stageRect.top;
+          const bend = (x1 + x2) / 2;
+          const horizontal = x2 >= x1;
+          path.setAttribute('d', horizontal
+            ? `M ${x1} ${y1} C ${bend} ${y1}, ${bend} ${y2}, ${x2} ${y2}`
+            : `M ${x1} ${y1} C ${x1} ${(y1 + y2) / 2}, ${x2} ${(y1 + y2) / 2}, ${x2} ${y2}`);
+          startDot.setAttribute('cx', x1);
+          startDot.setAttribute('cy', y1);
+          endDot.setAttribute('cx', x2);
+          endDot.setAttribute('cy', y2);
+          connector.setAttribute('viewBox', `0 0 ${stageRect.width} ${stageRect.height}`);
+        }
+        function followWindow() {
+          cancelAnimationFrame(connectorFrame);
+          if (prefersReducedMotion) { drawConnection(); return; }
+          const started = performance.now();
+          function frame(now) {
+            drawConnection();
+            if (now - started < 370) connectorFrame = requestAnimationFrame(frame);
+          }
+          connectorFrame = requestAnimationFrame(frame);
+        }
+        function select(row, column) {
+          activeRow = row;
+          activeColumn = column;
+          scanIndex = row * outputSize + (row % 2 === 0 ? column : outputSize - 1 - column);
+          inputCells.forEach((cell, index) => {
+            const inputRow = Math.floor(index / inputSize);
+            const inputColumn = index % inputSize;
+            cell.classList.toggle('is-active', inputRow >= row && inputRow < row + windowSize && inputColumn >= column && inputColumn < column + windowSize);
+          });
+          outputCells.forEach((cell, index) => {
+            const selected = index === row * outputSize + column;
+            cell.classList.toggle('is-active', selected);
+            cell.setAttribute('aria-pressed', String(selected));
+          });
+          placeWindow();
+          followWindow();
+        }
+        outputGrid.addEventListener('pointerenter', () => { interacting = true; });
+        outputGrid.addEventListener('pointerleave', (event) => { if (event.pointerType !== 'touch') interacting = false; });
+        outputGrid.addEventListener('focusout', (event) => { if (!outputGrid.contains(event.relatedTarget)) interacting = false; });
+        stage.addEventListener('pointerdown', (event) => { if (!outputGrid.contains(event.target)) interacting = false; });
+        new ResizeObserver(() => { placeWindow(); followWindow(); }).observe(stage);
+        select(activeRow, activeColumn);
+        if (!prefersReducedMotion) {
+          window.setInterval(() => {
+            if (interacting || document.hidden) return;
+            scanIndex = (scanIndex + 1) % (outputSize * outputSize);
+            const row = Math.floor(scanIndex / outputSize);
+            const offset = scanIndex % outputSize;
+            select(row, row % 2 === 0 ? offset : outputSize - 1 - offset);
+          }, 580);
+        }
+      })();
+    </script>
+  </body>
+</html>

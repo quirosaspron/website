@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 218" role="img" aria-labelledby="title">
+  <title id="title">Handwritten study of the Halvorsen attractor equations</title>
+  <defs>
+    <filter id="ink" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045 0.12" numOctaves="2" seed="7" result="rough"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.48 0.72" numOctaves="3" seed="19" result="grain"/>
+      <feColorMatrix in="grain" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  .33 .33 .33 0 0" result="grain-alpha"/>
+      <feComponentTransfer in="grain-alpha" result="uneven-ink"><feFuncA type="linear" slope="1.85" intercept="-.25"/></feComponentTransfer>
+      <feComposite in="SourceGraphic" in2="uneven-ink" operator="in" result="textured"/>
+      <feDisplacementMap in="textured" in2="rough" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <g fill="#233f9c" font-family="Freestyle Script, French Script MT, Segoe Script, cursive" font-size="49" font-weight="400" filter="url(#ink)">
+    <text x="12" y="48" transform="rotate(-3 12 48)">ẋ = −ax − 4y − 4z − y²</text>
+    <text x="22" y="104" transform="rotate(-1.2 22 104)">ẏ = −ay − 4z − 4x − z²</text>
+    <text x="14" y="160" transform="rotate(-2.6 14 160)">ż = −az − 4x − 4y − x²</text>
+  </g>
+  <g fill="none" stroke="#5672ba" stroke-width=".55" opacity=".37" font-family="Freestyle Script, French Script MT, Segoe Script, cursive" font-size="49">
+    <text x="12.4" y="48.6" transform="rotate(-3 12 48)">ẋ = −ax − 4y − 4z − y²</text>
+    <text x="22.4" y="104.7" transform="rotate(-1.2 22 104)">ẏ = −ay − 4z − 4x − z²</text>
+    <text x="14.3" y="160.6" transform="rotate(-2.6 14 160)">ż = −az − 4x − 4y − x²</text>
+  </g>
+</svg>

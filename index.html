@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Mateo Quiros Aspron — education, experience, projects, and research." />
+    <title>Mateo Quiros Aspron</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=20261024-m" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script type="importmap">{"imports":{"three":"./vendor/three/three.module.js","three/examples/jsm/":"./vendor/three/"}}</script>
+    <style>
+      :root {
+        --rail-width: 142px;
+        --background: #f7f7f2;
+        --foreground: #151515;
+        --secondary: #716f69;
+        --line: rgba(21, 21, 21, 0.24);
+        --placeholder: #dcd9d1;
+        --ui-font: "Inter", Arial, Helvetica, sans-serif;
+        --display-font: Optima, "Optima Nova", "Segoe UI", Arial, sans-serif;
+      }
+      body.dark {
+        --background: #151515;
+        --foreground: #f1efe9;
+        --secondary: #a9a7a1;
+        --line: rgba(241, 239, 233, 0.28);
+        --placeholder: #292929;
+      }
+
+      * { box-sizing: border-box; }
+      html { background: var(--background); }
+      body {
+        min-width: 0;
+        margin: 0;
+        overflow-x: hidden;
+        color: var(--foreground);
+        background: var(--background);
+        font-family: var(--ui-font);
+        font-size: 14px;
+        line-height: 1.4;
+        transition: color 180ms ease, background 180ms ease;
+      }
+      a { color: inherit; text-decoration: none; }
+      button { color: inherit; font: inherit; }
+      ::selection { color: var(--background); background: var(--foreground); }
+
+      .left-nav {
+        position: absolute;
+        inset: 0 auto 0 0;
+        z-index: 10;
+        width: var(--rail-width);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: space-between;
+        padding: 22px 20px;
+        border-right: 1px solid var(--line);
+        background: var(--background);
+      }
+      .brand { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; }
+      .nav-list { position: absolute; top: 50%; left: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; transform: translateY(-50%); }
+      .nav-link { color: var(--secondary); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; transition: color 180ms ease; }
+      .nav-link:hover, .nav-link:focus-visible { color: var(--foreground); }
+      .theme-toggle {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        margin-top: auto;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: transparent;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .horizontal-viewport {
+        position: sticky;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .horizontal-track { display: flex; width: max-content; min-width: 100%; height: 100%; }
+      .panel {
+        position: relative;
+        flex: 0 0 100vw;
+        height: 100vh;
+        min-height: 620px;
+        padding: 34px 6vw 42px;
+        border-right: 1px solid var(--line);
+      }
+
+      .intro-panel { display: flex; flex-direction: column; padding-left: calc(var(--rail-width) + 6vw); }
+      .intro-grid { flex: 1; display: flex; align-items: flex-end; padding: 120px 0 135px; }
+      .intro-copy { position: absolute; right: 5vw; bottom: clamp(65px, 16vh, 150px); left: calc(var(--rail-width) + 6vw); z-index: 2; min-width: 0; width: auto; align-self: auto; }
+      .intro-copy h1 { max-width: none; margin: 0 0 24px; white-space: nowrap; font-family: var(--display-font); font-size: clamp(2.4rem, 4vw, 5.2rem); font-weight: 400; font-synthesis: none; line-height: 1; letter-spacing: 0.22em; text-transform: uppercase; }
+      .intro-copy h1 span { display: inline-block; }
+      .intro-copy h1 span + span { margin-left: 0.44em; }
+      .intro-copy p { max-width: none; margin: 0 0 11px; color: var(--secondary); font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; white-space: nowrap; }
+      .intro-copy .current { margin-top: 30px; color: var(--foreground); }
+      .intro-footer { display: flex; justify-content: space-between; gap: 24px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--secondary); font-size: 11px; }
+      .intro-attractor { position: absolute; top: clamp(14px, calc(5vh - 12px), 48px); left: 130px; z-index: 1; width: min(51vw, 600px); height: min(61vh, 465px); }
+      .intro-attractor canvas { display: block; }
+      .intro-handwriting { position: absolute; top: clamp(170px, 26vh, 205px); left: calc(188px + min(41vw, 500px)); z-index: 2; width: min(23vw, 260px); opacity: 0.8; }
+      .intro-handwriting img { display: block; width: 100%; height: auto; }
+      body.dark .intro-handwriting img { filter: invert(1); }
+
+      .portrait-panel { display: grid; place-items: center; padding: 8vh 9vw; }
+      .portrait-panel img { display: block; width: auto; height: min(70vh, 510px); max-width: min(62vw, 650px); object-fit: contain; filter: blur(var(--portrait-blur, 14px)); }
+
+      .timeline-panel { width: var(--timeline-width, 4400px); flex-basis: var(--timeline-width, 4400px); padding-right: 7vw; }
+      .timeline-panel::before { content: ""; position: absolute; top: calc(56% + 23.2px); right: 0; left: 6vw; height: 1px; background: var(--line); }
+      .timeline-title { max-width: none; margin: 0; white-space: nowrap; font-family: var(--display-font); font-size: clamp(1.8rem, 2.6vw, 3rem); font-weight: 400; line-height: 1.05; letter-spacing: -0.045em; }
+      .timeline-entries { position: absolute; top: 96px; right: 7vw; bottom: 34px; left: 6vw; display: flex; align-items: stretch; gap: 90px; width: max-content; }
+      .timeline-entry { position: relative; flex: 0 0 300px; height: 100%; opacity: 0; transform: translateY(18px); transition: opacity 420ms ease var(--entry-delay, 0ms), transform 420ms ease var(--entry-delay, 0ms); }
+      .timeline-entry.is-visible { opacity: 1; transform: translateY(0); }
+      .timeline-dot { position: absolute; top: calc(56% - 7px); left: 0; z-index: 1; width: 14px; height: 14px; border: 2px solid var(--foreground); border-radius: 50%; background: var(--background); animation: timeline-dot-pulse 2.6s ease-in-out infinite; transition: transform 180ms ease, background 180ms ease; }
+      .timeline-entry:hover .timeline-dot { transform: scale(1.45); background: var(--foreground); }
+      .entry-card, .entry-card.below { position: absolute; top: calc(56% + 22px); left: 24px; z-index: 1; width: 300px; padding: 0; background: transparent; }
+      .entry-card.above { position: absolute; top: auto; right: auto; bottom: calc(44% + 22px); left: 24px; z-index: 1; width: 300px; display: flex; flex-direction: column; background: transparent; }
+      .entry-card.above .entry-year { order: 1; margin-top: 15px; }
+      .entry-card.above h3 { order: 2; }
+      .entry-card.above > p:not(.entry-year) { order: 3; }
+      .entry-card.above .entry-facts { order: 4; }
+      .entry-year { margin-bottom: 11px; color: var(--secondary); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .entry-card.below .entry-year { position: absolute; top: -52px; left: -17px; z-index: 2; margin: 0; padding: 0 5px; background: var(--background); transform: translateX(-50%); white-space: nowrap; }
+      .entry-card.above .entry-year { position: absolute; bottom: -52px; left: -17px; z-index: 2; margin: 0; padding: 0 5px; background: var(--background); transform: translateX(-50%); white-space: nowrap; }
+      .entry-card h3 { margin: 0 0 10px; font-family: var(--display-font); font-size: 22px; font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; }
+      .entry-card p { margin: 0; color: var(--secondary); font-size: 13px; }
+      .entry-facts { margin: 15px 0 0; padding-left: 16px; color: var(--secondary); font-size: 12px; }
+      .entry-facts li + li { margin-top: 4px; }
+      .entry-media { position: absolute; left: 40px; z-index: 1; width: 176px; height: 176px; }
+      .entry-card.above + .entry-media { top: calc(56% + 34px); }
+      .entry-card.below + .entry-media { bottom: calc(44% + 34px); }
+      .photo-grid { display: grid; grid-template-columns: repeat(2, 84px); grid-template-rows: repeat(2, 84px); gap: 8px; }
+      .entry-media.singapore-photos, .entry-media.digital-twin-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); width: 248px; height: 248px; }
+      .singapore-photos img, .digital-twin-photos img { display: block; width: 100%; height: 100%; object-fit: cover; }
+      .singapore-photos img:nth-child(3) { object-position: 40% 48%; }
+      .digital-twin-photos img:nth-child(4) { object-position: 42% center; }
+      .entry-media.holberton-photos { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 8px; left: 24px; width: 332px; height: 176px; }
+      .holberton-photos button { display: grid; place-items: center; min-width: 0; overflow: hidden; border: 0; padding: 0; background: var(--placeholder); }
+      .holberton-photos img { display: block; width: 100%; height: 100%; object-fit: contain; }
+      .holberton-photos button:nth-child(1) { grid-column: 2; grid-row: 1; }
+      .holberton-photos button:nth-child(2) { grid-column: 2; grid-row: 2; }
+      .holberton-photos button:nth-child(2) img { transform: scale(1.3); transform-origin: 94% 20%; }
+      .holberton-photos button:nth-child(3) { grid-column: 1; grid-row: 1 / span 2; }
+      .holberton-photos button:nth-child(3) img { object-fit: cover; }
+      .entry-media img, .holberton-photos button { cursor: zoom-in; }
+      .entry-media img:focus-visible, .holberton-photos button:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
+      .entry-media.photo-pair { display: grid; grid-template-columns: minmax(0, 1fr) 168px; align-items: center; gap: 8px; left: 24px; width: 364px; height: 136px; }
+      .photo-placeholder { display: grid; place-items: center; border: 1px dashed var(--line); background: var(--placeholder); color: var(--secondary); font-size: 8px; letter-spacing: 0.08em; text-align: center; text-transform: uppercase; }
+      .photo-grid .photo-placeholder { width: 84px; height: 84px; }
+      .photo-pair img { display: block; width: 100%; object-fit: contain; }
+      .photo-pair .event-logo { height: 136px; }
+      .photo-pair .event-photo { height: auto; }
+      body.dark .photo-pair .event-logo { filter: invert(1) hue-rotate(180deg); }
+      .photo-large .photo-placeholder { width: 176px; height: 176px; }
+      .math-illustration img { display: block; width: 100%; height: 100%; object-fit: cover; }
+      .entry-media.silverstone-photo { height: 170px; overflow: hidden; }
+      .silverstone-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
+      .entry-media.icpc-logo { width: 238px; height: 170px; }
+      .icpc-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+      .entry-media.arise-robot { left: 0; width: 300px; height: 272px; overflow: hidden; }
+      .arise-robot canvas { display: block; width: 100%; height: 100%; }
+      .arise-robot .robot-fallback { display: none; color: var(--secondary); font-size: 12px; }
+      .arise-robot[data-model-state="error"] .robot-fallback { display: block; }
+      .timeline-entry .entry-media > img:not(.event-logo),
+      .timeline-entry .entry-media > button {
+        opacity: 0.18;
+        filter: blur(10px) saturate(0.75);
+        transform: translate3d(0, 18px, 0) scale(1.025);
+        transition: opacity 780ms ease, filter 900ms ease, transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--photo-stagger, 0ms);
+      }
+      .entry-media > :nth-child(2) { --photo-stagger: 75ms; }
+      .entry-media > :nth-child(3) { --photo-stagger: 150ms; }
+      .entry-media > :nth-child(4) { --photo-stagger: 225ms; }
+      .timeline-entry.photos-in-view .entry-media > img:not(.event-logo),
+      .timeline-entry.photos-in-view .entry-media > button { opacity: 1; filter: none; transform: none; }
+      .photo-zoom { width: min(94vw, 1400px); max-width: none; max-height: 94vh; margin: auto; padding: 28px; border: 1px solid var(--line); background: var(--background); color: var(--foreground); box-shadow: 0 24px 80px #0003; }
+      .photo-zoom[open] { display: flex; align-items: center; justify-content: center; }
+      .photo-zoom::backdrop { background: #111b; backdrop-filter: blur(8px); }
+      .photo-zoom img { display: block; max-width: 100%; max-height: calc(94vh - 56px); object-fit: contain; cursor: zoom-out; }
+      .photo-zoom-close { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: var(--background); color: var(--foreground); cursor: pointer; font-size: 20px; line-height: 1; }
+      .tetris-game { position: absolute; top: calc(56% + 36px); left: 24px; z-index: 1; }
+      .tetris-board { display: block; width: 128px; height: 192px; border: 1px solid var(--line); background: var(--placeholder); image-rendering: pixelated; }
+
+      @keyframes timeline-dot-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 transparent; }
+        50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--foreground) 16%, transparent); }
+      }
+
+      .end-panel { display: flex; flex-direction: column; }
+      .end-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10vw; align-items: center; }
+      .end-grid h2 { margin: 0; font-family: var(--display-font); font-size: clamp(2.4rem, 5vw, 5.5rem); font-weight: 400; line-height: 0.95; letter-spacing: -0.05em; }
+      .next-links { border-top: 1px solid var(--line); }
+      .next-link { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; padding: 20px 0; border-bottom: 1px solid var(--line); font-size: 22px; }
+      .next-link span { color: var(--secondary); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .next-link .link-address { text-transform: none; }
+      .next-link:hover span { color: var(--foreground); }
+      .next-link-pending { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; text-align: left; cursor: default; }
+      .next-link-pending:disabled { opacity: 1; }
+      .next-link-pending:hover span { color: var(--secondary); }
+
+      .back-button { position: fixed; top: 22px; left: 22px; z-index: 20; width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--foreground); background: var(--background); cursor: pointer; font-size: 20px; opacity: 0; pointer-events: none; transition: opacity 180ms ease; }
+      .back-button.is-visible { opacity: 1; pointer-events: auto; }
+      .left-nav.is-hidden { opacity: 0; pointer-events: none; transition: opacity 180ms ease; }
+
+      .vertical-scroll-driver { height: 100vh; }
+
+      @media (max-width: 720px) {
+        body { overflow-y: auto; }
+        .left-nav { position: absolute; width: 112px; padding: 18px 16px; }
+        .horizontal-viewport { position: static; width: 100vw; height: auto; overflow: visible; }
+        .horizontal-track { display: block; width: auto; min-width: 0; height: auto; }
+        .panel, .timeline-panel { width: auto; min-height: 0; height: auto; padding: 24px 24px 48px; border-right: 0; }
+        .intro-panel { padding-left: 136px; }
+        .intro-panel { min-height: max(820px, 100svh); }
+        .intro-grid { display: block; padding: 30px 0; }
+        .intro-copy { right: 15px; bottom: 40px; left: 136px; }
+        .intro-copy h1 { white-space: normal; font-size: 2rem; line-height: 1.16; letter-spacing: 0.12em; }
+        .intro-copy h1 span + span { margin-left: 0.24em; }
+        .intro-copy p { max-width: 390px; font-size: 10px; white-space: normal; }
+        .intro-attractor { top: 83px; left: 112px; width: calc(100vw - 112px); height: 350px; }
+        .intro-handwriting { top: 275px; right: 12px; left: auto; width: min(45vw, 175px); }
+        .portrait-panel { min-height: min(640px, 78svh); padding: 70px 10vw; }
+        .portrait-panel img { width: min(80vw, 420px); height: auto; max-width: 100%; }
+        .intro-footer { display: block; }
+        .intro-footer span { display: block; margin-bottom: 6px; }
+        .timeline-panel { padding-bottom: 64px; }
+        .timeline-entries { position: static; display: block; width: auto; padding-top: 45px; }
+        .timeline-panel::before { display: none; }
+        .timeline-entry { width: 100%; height: auto; min-height: 0; margin-bottom: 32px; }
+        .timeline-dot { top: 0; left: -31px; }
+        .timeline-entry { opacity: 1; transform: none; }
+        .entry-card, .entry-card.above, .entry-card.below { position: static; width: 100%; padding: 22px 0; border-top: 1px solid var(--line); display: block; }
+        .entry-card .entry-year, .entry-card.above .entry-year, .entry-card.below .entry-year { position: static; display: block; margin: 0 0 11px; padding: 0; background: transparent; text-align: left; transform: none; white-space: normal; }
+        .entry-card.above::after, .entry-card.below::before { display: none; }
+        .entry-media, .entry-card.above + .entry-media, .entry-card.below + .entry-media { position: static; width: 176px; height: 176px; margin: 0 0 20px; }
+        .entry-card.above + .entry-media.photo-pair { display: flex; flex-direction: column; align-items: flex-start; width: min(100%, 340px); height: auto; gap: 12px; }
+        .entry-card.below + .entry-media.silverstone-photo { height: 170px; }
+        .entry-media.icpc-logo { width: min(238px, calc(100vw - 48px)); height: auto; aspect-ratio: 7 / 5; }
+        .entry-card.below + .entry-media.arise-robot { width: min(300px, calc(100vw - 48px)); height: 272px; }
+        .entry-card.below + .entry-media.singapore-photos,
+        .entry-card.below + .entry-media.digital-twin-photos { width: min(248px, calc(100vw - 48px)); height: auto; aspect-ratio: 1; }
+        .entry-card.above + .entry-media.holberton-photos { width: min(100%, 332px); height: 176px; }
+        .photo-pair .event-logo, .photo-pair .event-photo { width: min(100%, 240px); }
+        .photo-pair .event-logo { height: 100px; }
+        .tetris-game { position: static; margin: 0 0 20px; }
+        .end-grid { display: block; padding: 90px 0; }
+        .end-grid h2 { margin-bottom: 48px; }
+        .next-link { font-size: 18px; }
+        .vertical-scroll-driver { display: none; }
+      }
+      @media (min-width: 1250px) {
+        .intro-copy h1 { max-width: none; white-space: nowrap; }
+      }
+      @media (min-width: 721px) and (max-width: 900px) {
+        .intro-copy h1 { white-space: normal; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 0.12em; }
+        .intro-copy h1 span + span { margin-left: 0.24em; }
+        .intro-handwriting { top: 25vh; right: 3vw; left: auto; width: 28vw; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .portrait-panel img { filter: none; }
+        .timeline-entry { opacity: 1; transform: none; transition: none; }
+        .timeline-entry .entry-media > img:not(.event-logo),
+        .timeline-entry .entry-media > button { opacity: 1; filter: none; transform: none; transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="horizontal-viewport" id="horizontal-viewport">
+      <main class="horizontal-track">
+        <section class="panel intro-panel" id="main" aria-labelledby="name">
+          <aside class="left-nav" aria-label="Site navigation">
+            <nav class="nav-list">
+              <a class="nav-link" href="#main">Main</a>
+              <a class="nav-link" href="#timeline">Timeline</a>
+              <a class="nav-link" href="#projects">Projects</a>
+              <a class="nav-link" href="./blog.html">Blog</a>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode"><span aria-hidden="true">◐</span></button>
+          </aside>
+          <div class="intro-attractor" id="attractor" role="img" aria-label="Animated Halvorsen attractor"></div>
+          <div class="intro-handwriting"><img src="./assets/halvorsen-handwritten.svg" alt="Mateo's handwritten Halvorsen attractor equations and parameter a equals 1.6."></div>
+          <div class="intro-grid">
+            <div class="intro-copy">
+              <h1 id="name" aria-label="Mateo Quiros Aspron"><span aria-hidden="true">Mateo</span><span aria-hidden="true">Quiros</span><span aria-hidden="true">Aspron</span></h1>
+              <p>Applied Mathematics student</p>
+              <p>Universidad Panamericana</p>
+              <p>Machine learning · mathematical modeling · research · robotics</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel portrait-panel" aria-label="Portrait of Mateo Quiros Aspron">
+          <img src="./assets/mateo-portrait.webp" alt="Black and white portrait of Mateo Quiros Aspron" width="2038" height="1856" loading="lazy" decoding="async">
+        </section>
+
+        <section class="panel timeline-panel" id="timeline" aria-labelledby="timeline-title">
+          <h2 class="timeline-title" id="timeline-title">Education, experience, and projects</h2>
+          <div class="timeline-entries">
+            <article class="timeline-entry"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card above"><p class="entry-year">2022—2023</p><h3>Panteras Racing</h3><p>Founded Panteras Racing in PrepaUP; team leader, project manager, and sponsorship manager.</p><ul class="entry-facts"><li>Designed the Panteras Racing brand identity</li><li>Initially called Leben Forcer</li><li>More than MXN 1.5M in sponsorships</li></ul></div><div class="entry-media photo-pair" aria-label="Panteras Racing: two images"><img class="event-logo" src="assets/f1-in-schools-stacked.svg" alt="F1 in Schools logo" loading="lazy" decoding="async"><img class="event-photo" src="assets/panteras-racing-founding-photo.jpg" alt="Early Panteras Racing planning at a whiteboard" loading="lazy" decoding="async"></div></article>
+            <article class="timeline-entry"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card below"><p class="entry-year">2022</p><h3>Silverstone world finals</h3><p>F1 in Schools World Finals.</p></div><div class="entry-media photo-large silverstone-photo" aria-label="Silverstone World Finals photo"><img src="assets/silverstone-world-finals-2026.jpg" alt="Leben Forcer Akron team presentation at the Silverstone World Finals" loading="lazy" decoding="async"></div></article>
+            <article class="timeline-entry"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card above"><p class="entry-year">2023—now</p><h3>Universidad Panamericana</h3><p>Applied Mathematics student · 7th semester</p><ul class="entry-facts"><li>Pure mathematics</li><li>Applied mathematics</li><li>Proof-focused program</li><li>Expected graduation: December 2027</li><li>GPA: 9.3 / 10</li><li>English: C1</li></ul></div><div class="entry-media photo-large math-illustration" aria-label="Mathematics illustration for Universidad Panamericana"><img src="assets/mathematics-study-illustration.webp" alt="Illustration of hands working through mathematical notes" loading="lazy" decoding="async"></div></article>
+            <article class="timeline-entry"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card below"><p class="entry-year">2023</p><h3>Singapore world finals</h3><p>F1 in Schools World Finals.</p><ul class="entry-facts"><li>F1 Sustainability Award</li><li>Silver Helmet by the Mexican Automotive Federation</li><li>Nominated: Best Sponsorship Strategy</li><li>Nominated: Best Enterprise Portfolio</li></ul></div><div class="entry-media photo-grid singapore-photos" aria-label="Singapore World Finals: four photos"><img src="assets/singapore-award-2026.jpg" alt="Holding the F1 in Schools Sustainability Award" loading="lazy" decoding="async"><img src="assets/singapore-world-finals-2.jpg" alt="Visiting Marina Bay Sands in Singapore" loading="lazy" decoding="async"><img src="assets/singapore-world-finals-3.jpg" alt="Team on stage with the Mexican flag at the World Finals" loading="lazy" decoding="async"><img src="assets/singapore-world-finals-4.jpg" alt="Panteras Racing teammates at the World Finals" loading="lazy" decoding="async"></div></article>
+            <article class="timeline-entry"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card above"><p class="entry-year">2023—2025</p><h3>Holberton Anáhuac</h3><p>Foundations of Computer Science, followed by a machine learning specialization.</p><ul class="entry-facts"><li>U-Net disaster detection</li><li>Time series</li><li>Neural style transfer</li></ul></div><div class="entry-media holberton-photos" aria-label="Holberton Anáhuac: certificate and two project images"><button type="button" aria-label="Zoom Holberton completion certificate"><img src="assets/holberton-certificate.jpg" alt="Holberton Foundations of Computer Science certificate of completion for Mateo Quirós Asprón" loading="lazy" decoding="async"></button><button type="button" aria-label="Zoom disaster detection project image"><img src="assets/holberton-disaster-detection.jpg" alt="U-Net disaster detection showing pre- and post-disaster satellite images and a predicted damage overlay" loading="lazy" decoding="async"></button><button type="button" aria-label="Zoom neural style transfer portrait"><img src="assets/holberton-style-transfer.jpg" alt="Colorful portrait created with neural style transfer" loading="lazy" decoding="async"></button></div></article>
+            <article class="timeline-entry"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card below"><p class="entry-year">2025</p><h3>ICPC national final</h3><p>Participated with Nexus Lab UP.</p><ul class="entry-facts"><li>National final</li><li>Competitive programming</li></ul></div><div class="entry-media icpc-logo" aria-label="ICPC Foundation logo"><img src="assets/icpc-foundation-logo.png" alt="ICPC Foundation logo" loading="lazy" decoding="async"></div></article>
+            <article class="timeline-entry" id="projects"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card above"><p class="entry-year">2025—2026</p><h3>Nand2Tetris</h3><p>Virtual computer implemented from first principles.</p><ul class="entry-facts"><li>Logic gates and CPU</li><li>Compiler and operating system</li><li>Low-level Tetris game</li></ul></div><div class="tetris-game"><canvas class="tetris-board" width="100" height="150" role="img" aria-label="Animated pixel Tetris board with falling blocks.">Animated pixel Tetris board</canvas></div></article>
+            <article class="timeline-entry"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card below"><p class="entry-year">2026</p><h3>Digital twin</h3><p>AI-powered telemetry system for a chemical plant.</p><ul class="entry-facts"><li>Chemical distillation prediction</li><li>Industrial optimization</li><li>Implementation in progress</li></ul></div><div class="entry-media photo-grid digital-twin-photos" aria-label="Chemical plant digital twin: four photos"><img src="assets/chemical-plant-1.jpg" alt="Elevated view of the chemical plant and distillation equipment" loading="lazy" decoding="async"><img src="assets/chemical-plant-2.jpg" alt="Soldering electronics for the chemical plant project" loading="lazy" decoding="async"><img src="assets/chemical-plant-3.jpg" alt="At the chemical plant beside the distillation equipment" loading="lazy" decoding="async"><img src="assets/chemical-plant-4.jpg" alt="Descending the chemical plant stairs with the equipment in view" loading="lazy" decoding="async"></div></article>
+            <article class="timeline-entry"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card above"><p class="entry-year">2026—now</p><h3>Polymath Jr.</h3><p>Generative modeling via drifting and priming models.</p><ul class="entry-facts"><li>Generative modeling</li><li>Generative AI inference</li><li>Sampling</li><li>Research</li><li>Mentor: Giulio Triglia - CUNY</li><li>Mentor: Ricardo Baptista - University of Toronto</li></ul></div><div class="entry-media photo-large" aria-label="Polymath Jr.: one large photo slot"><div class="photo-placeholder">Photo / insert later</div></div></article>
+            <article class="timeline-entry" id="arise-entry"><span class="timeline-dot" aria-hidden="true"></span><div class="entry-card below"><p class="entry-year">2026—now</p><h3>ARISE</h3><p>Advanced Robotics Intelligence Systems and Engineering. A Unitree Go2-based rescue robot for exploring hazardous environments.</p><ul class="entry-facts"><li>ROS 2 programming</li><li>Robot autonomy</li><li>Research</li><li>Mapping and autonomous navigation</li><li>Environment and victim perception</li><li>Custom arm for buttons, valves, and objects</li></ul></div><div class="entry-media arise-robot" role="img" aria-label="Unitree Go2 model walks, sits, and waves as you scroll"><span class="robot-fallback">Unitree Go2</span></div></article>
+          </div>
+        </section>
+
+        <section class="panel end-panel" id="blog" aria-labelledby="contact-title">
+          <div class="end-grid">
+            <h2 id="contact-title">Continue</h2>
+            <div class="next-links">
+              <a class="next-link" href="mailto:mateoquirosaspron@gmail.com"><span>Contact</span><span class="link-address">mateoquirosaspron@gmail.com ↗</span></a>
+              <a class="next-link" href="./blog.html"><span>Blog</span><span>Entries ↗</span></a>
+              <button class="next-link next-link-pending" type="button" disabled><span>CV</span><span>PDF coming soon ↗</span></button>
+              <a class="next-link" href="https://github.com/quirosaspron" target="_blank" rel="noopener noreferrer"><span>GitHub</span><span class="link-address">github.com/quirosaspron ↗</span></a>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <button class="back-button" id="back-to-start" type="button" aria-label="Go back to the beginning">←</button>
+    <dialog class="photo-zoom" id="photo-zoom" aria-label="Enlarged timeline photo"><button class="photo-zoom-close" type="button" aria-label="Close photo">×</button><img id="photo-zoom-image" alt=""></dialog>
+    <div class="vertical-scroll-driver" aria-hidden="true"></div>
+
+    <script>
+      const viewport = document.querySelector('#horizontal-viewport');
+      const track = document.querySelector('.horizontal-track');
+      const timelinePanel = document.querySelector('.timeline-panel');
+      const timelineEntries = document.querySelector('.timeline-entries');
+      const timelineEntryList = [...document.querySelectorAll('.timeline-entry')];
+      const driver = document.querySelector('.vertical-scroll-driver');
+      const toggle = document.querySelector('#theme-toggle');
+      const backButton = document.querySelector('#back-to-start');
+      const leftNav = document.querySelector('.left-nav');
+      const storageKey = 'mateo-site-theme';
+      const photoZoom = document.querySelector('#photo-zoom');
+      const photoZoomImage = document.querySelector('#photo-zoom-image');
+      const portraitImage = document.querySelector('.portrait-panel img');
+      const portraitReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      document.querySelectorAll('.timeline-entry .entry-media img').forEach((img) => {
+        const trigger = img.closest('button') || img;
+        trigger.addEventListener('click', () => {
+          photoZoomImage.src = img.currentSrc || img.src;
+          photoZoomImage.alt = img.alt;
+          photoZoom.showModal();
+        });
+        if (trigger === img) {
+          img.tabIndex = 0;
+          img.setAttribute('role', 'button');
+          img.setAttribute('aria-label', `Zoom ${img.alt}`);
+          img.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              img.click();
+            }
+          });
+        }
+      });
+      photoZoom.querySelector('.photo-zoom-close').addEventListener('click', () => photoZoom.close());
+      photoZoomImage.addEventListener('click', () => photoZoom.close());
+      photoZoom.addEventListener('click', (event) => {
+        if (event.target === photoZoom) photoZoom.close();
+      });
+
+      function maxHorizontalScroll() { return Math.max(0, track.scrollWidth - viewport.clientWidth); }
+      function maxVerticalScroll() { return Math.max(1, document.documentElement.scrollHeight - window.innerHeight); }
+      timelineEntryList.forEach((entry, index) => entry.style.setProperty('--entry-delay', `${Math.min(index, 5) * 70}ms`));
+      function revealTimelineEntries() {
+        if (window.matchMedia('(max-width: 720px)').matches) {
+          timelineEntryList.forEach((entry) => {
+            const entryRect = entry.getBoundingClientRect();
+            entry.classList.toggle('is-visible', entryRect.top < window.innerHeight * 0.9 && entryRect.bottom > 0);
+            const media = entry.querySelector('.entry-media');
+            if (media && media.querySelector('img')) {
+              const mediaRect = media.getBoundingClientRect();
+              entry.classList.toggle('photos-in-view', mediaRect.top < window.innerHeight * 0.85 && mediaRect.bottom > window.innerHeight * 0.05);
+            }
+          });
+          return;
+        }
+        const viewportRect = viewport.getBoundingClientRect();
+        timelineEntryList.forEach((entry) => {
+          const entryRect = entry.getBoundingClientRect();
+          entry.classList.toggle('is-visible', entryRect.right > viewportRect.left - 180 && entryRect.left < viewportRect.right + 180);
+          const media = entry.querySelector('.entry-media');
+          if (media && media.querySelector('img')) {
+            const mediaRect = media.getBoundingClientRect();
+            entry.classList.toggle('photos-in-view', mediaRect.right > viewportRect.left + 40 && mediaRect.left < viewportRect.right - 40);
+          }
+        });
+      }
+      function updatePortraitFocus() {
+        if (portraitReducedMotion.matches) {
+          portraitImage.style.setProperty('--portrait-blur', '0px');
+          return;
+        }
+        const rect = portraitImage.getBoundingClientRect();
+        const mobile = window.matchMedia('(max-width: 720px)').matches;
+        const viewportSize = mobile ? window.innerHeight : viewport.clientWidth;
+        const imageSize = mobile ? rect.height : rect.width;
+        const imageStart = mobile ? rect.top : rect.left;
+        const clearStart = (viewportSize - imageSize) / 2 + imageSize * 0.45;
+        const progress = Math.min(1, Math.max(0, (viewportSize - imageStart) / Math.max(1, viewportSize - clearStart)));
+        portraitImage.style.setProperty('--portrait-blur', `${((1 - progress) * 14).toFixed(2)}px`);
+      }
+      function syncHorizontalToVertical() {
+        if (window.matchMedia('(max-width: 720px)').matches) {
+          updatePortraitFocus();
+          revealTimelineEntries();
+          return;
+        }
+        const progress = Math.min(1, Math.max(0, window.scrollY / maxVerticalScroll()));
+        viewport.scrollLeft = maxHorizontalScroll() * progress;
+        updatePortraitFocus();
+        backButton.classList.toggle('is-visible', progress > 0.04);
+        leftNav.classList.toggle('is-hidden', progress > 0.04);
+        revealTimelineEntries();
+      }
+      function resizeTimeline() {
+        if (window.matchMedia('(max-width: 720px)').matches) return;
+        const width = timelineEntries.scrollWidth + (window.innerWidth * 0.20);
+        timelinePanel.style.setProperty('--timeline-width', `${width}px`);
+      }
+      function resizeDriver() {
+        resizeTimeline();
+        requestAnimationFrame(() => {
+          driver.style.height = `${Math.max(1, maxHorizontalScroll())}px`;
+          syncHorizontalToVertical();
+        });
+      }
+      function setTheme(theme) {
+        document.body.classList.toggle('dark', theme === 'dark');
+        toggle.innerHTML = theme === 'dark' ? '<span aria-hidden="true">☼</span>' : '<span aria-hidden="true">◐</span>';
+        toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to bright mode' : 'Switch to dark mode');
+        localStorage.setItem(storageKey, theme);
+      }
+
+      function initMiniTetris() {
+        const canvas = document.querySelector('.tetris-board');
+        const context = canvas.getContext('2d');
+        if (!context) return;
+        const columns = 10;
+        const rows = 15;
+        const cell = 10;
+        const shapes = [
+          [[1, 1, 1], [0, 1, 0]],
+          [[1, 1], [1, 1]],
+          [[1, 1, 1, 1]],
+          [[0, 1, 1], [1, 1, 0]],
+          [[1, 0, 0], [1, 1, 1]]
+        ];
+        const startingRows = [
+          [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+          [1, 1, 0, 0, 0, 0, 0, 1, 1, 0],
+          [1, 1, 0, 0, 1, 1, 0, 1, 1, 0],
+          [1, 1, 1, 0, 1, 1, 0, 1, 1, 1]
+        ];
+        const freshBoard = () => [
+          ...Array.from({ length: rows - startingRows.length }, () => Array(columns).fill(0)),
+          ...startingRows.map((row) => [...row])
+        ];
+        let board = freshBoard();
+        let pieceIndex = 0;
+        let piece;
+        let targetX = 0;
+
+        function collides(shape, nextX, nextY) {
+          return shape.some((row, y) => row.some((filled, x) => filled && (
+            nextX + x < 0 || nextX + x >= columns || nextY + y >= rows ||
+            (nextY + y >= 0 && board[nextY + y][nextX + x])
+          )));
+        }
+        function spawn() {
+          const shape = shapes[pieceIndex++ % shapes.length].map((row) => [...row]);
+          piece = { shape, x: Math.floor((columns - shape[0].length) / 2), y: 0 };
+          if (collides(shape, piece.x, piece.y)) board = freshBoard();
+          const destinations = [0, 6, 3, 7, 1, 4, 0, 5];
+          targetX = Math.min(columns - shape[0].length, destinations[(pieceIndex - 1) % destinations.length]);
+        }
+        function drawCell(x, y, color) {
+          context.fillStyle = color;
+          context.fillRect(x * cell + 1, y * cell + 1, cell - 2, cell - 2);
+        }
+        function render() {
+          const theme = getComputedStyle(document.body);
+          context.fillStyle = theme.getPropertyValue('--placeholder').trim();
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          const settled = theme.getPropertyValue('--secondary').trim();
+          const active = theme.getPropertyValue('--foreground').trim();
+          board.forEach((row, y) => row.forEach((filled, x) => { if (filled) drawCell(x, y, settled); }));
+          piece.shape.forEach((row, y) => row.forEach((filled, x) => { if (filled) drawCell(piece.x + x, piece.y + y, active); }));
+        }
+        function step() {
+          if (!collides(piece.shape, piece.x, piece.y + 1)) {
+            piece.y++;
+          } else {
+            piece.shape.forEach((row, y) => row.forEach((filled, x) => {
+              if (filled) board[piece.y + y][piece.x + x] = 1;
+            }));
+            board = board.filter((row) => !row.every(Boolean));
+            while (board.length < rows) board.unshift(Array(columns).fill(0));
+            spawn();
+          }
+          render();
+        }
+        spawn();
+        render();
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        window.setInterval(() => {
+          if (document.hidden) return;
+          const direction = Math.sign(targetX - piece.x);
+          if (direction && !collides(piece.shape, piece.x + direction, piece.y)) piece.x += direction;
+          step();
+        }, 380);
+      }
+
+      setTheme(localStorage.getItem(storageKey) || 'bright');
+      initMiniTetris();
+      resizeDriver();
+      toggle.addEventListener('click', () => setTheme(document.body.classList.contains('dark') ? 'bright' : 'dark'));
+      backButton.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      window.addEventListener('scroll', syncHorizontalToVertical, { passive: true });
+      window.addEventListener('resize', resizeDriver);
+      portraitReducedMotion.addEventListener('change', updatePortraitFocus);
+
+      document.querySelectorAll('.nav-link[href^="#"], .brand[href^="#"]').forEach((link) => link.addEventListener('click', (event) => {
+        if (window.matchMedia('(max-width: 720px)').matches) return;
+        event.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        const maxX = maxHorizontalScroll();
+        const targetX = Math.min(maxX, Math.max(0, target.offsetLeft));
+        window.scrollTo({ top: maxVerticalScroll() * (targetX / Math.max(1, maxX)), behavior: 'smooth' });
+      }));
+    </script>
+    <script src="./assets/halvorsen-preview/p5.js"></script>
+    <script src="./assets/halvorsen-preview/attractor.js"></script>
+    <script src="./assets/halvorsen-preview/sketch.js"></script>
+    <script type="module" src="./arise-robot.js"></script>
+  </body>
+</html>

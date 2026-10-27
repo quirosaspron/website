@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Halvorsen homepage study — Mateo Quiros Aspron</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --paper:#f7f7f2; --ink:#151515; --muted:#716f69; --line:rgba(21,21,21,.24); --blue:#002fa7; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; min-height:100%; background:var(--paper); color:var(--ink); font-family:Inter,Arial,sans-serif; }
+    .study { min-height:100svh; position:relative; overflow:hidden; }
+    .rail { position:absolute; inset:0 auto 0 0; width:142px; border-right:1px solid var(--line); padding:22px 20px; display:flex; flex-direction:column; justify-content:center; gap:18px; z-index:3; background:var(--paper); }
+    .rail a { width:max-content; font-size:10px; letter-spacing:.08em; text-transform:uppercase; text-decoration:none; color:var(--muted); }
+    .rail a:hover { color:var(--ink); }
+    .preview-label { position:absolute; top:28px; right:5vw; z-index:2; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+    .attractor { position:absolute; top:clamp(14px,calc(5vh - 12px),48px); left:130px; width:min(51vw,600px); height:min(61vh,465px); z-index:1; }
+    .attractor canvas { display:block; }
+    .handwriting { position:absolute; top:clamp(170px,26vh,205px); left:calc(188px + min(41vw,500px)); width:min(23vw,260px); z-index:2; opacity:.8; }
+    .handwriting img { display:block; width:100%; height:auto; }
+    .copy { position:absolute; left:calc(142px + 6vw); right:5vw; bottom:clamp(65px,16vh,150px); z-index:2; }
+    h1 { margin:0 0 24px; white-space:nowrap; font-family:Optima,"Optima Nova","Segoe UI",Arial,sans-serif; font-weight:400; font-size:clamp(2.4rem,4vw,5.2rem); line-height:1; letter-spacing:.22em; text-transform:uppercase; }
+    h1 span+span { margin-left:.44em; }
+    .copy p { margin:0 0 11px; color:var(--muted); font-size:10px; letter-spacing:.11em; text-transform:uppercase; white-space:nowrap; }
+    @media(max-width:900px) {
+      .rail { width:112px; padding:18px 16px; }
+      .attractor { left:112px; top:calc(5vh - 12px); width:70vw; height:50vh; }
+      .handwriting { top:25vh; right:3vw; left:auto; width:28vw; }
+      .copy { left:136px; bottom:13vh; }
+      h1 { white-space:normal; font-size:clamp(2rem,5vw,3rem); letter-spacing:.12em; }
+      h1 span { display:inline-block; }
+      h1 span+span { margin-left:.24em; }
+    }
+    @media(max-width:600px) {
+      .study { min-height:820px; }
+      .preview-label { right:18px; }
+      .attractor { top:83px; left:112px; width:calc(100vw - 112px); height:350px; }
+      .handwriting { top:275px; right:12px; left:auto; width:min(45vw,175px); }
+      .copy { left:136px; right:15px; bottom:40px; }
+      h1 { font-size:2rem; line-height:1.16; }
+      .copy p { white-space:normal; }
+    }
+  </style>
+</head>
+<body>
+  <main class="study">
+    <nav class="rail" aria-label="Preview navigation">
+      <a href="./index.html">Main site ↗</a>
+      <a href="./blog.html">Blog ↗</a>
+    </nav>
+    <span class="preview-label">Homepage study / 01</span>
+    <div class="attractor" id="attractor" aria-label="Animated Halvorsen attractor" role="img"></div>
+    <div class="handwriting"><img src="./assets/halvorsen-handwritten.svg" alt="Mateo's handwritten Halvorsen equations and parameter a equals 1.6."></div>
+    <div class="copy">
+      <h1 aria-label="Mateo Quiros Aspron"><span>Mateo</span><span>Quiros</span><span>Aspron</span></h1>
+      <p>Applied Mathematics student</p>
+      <p>Universidad Panamericana</p>
+      <p>Machine learning · mathematical modeling · research · robotics</p>
+    </div>
+  </main>
+  <script src="./assets/halvorsen-preview/p5.js"></script>
+  <script src="./assets/halvorsen-preview/attractor.js"></script>
+  <script src="./assets/halvorsen-preview/sketch.js"></script>
+</body>
+</html>

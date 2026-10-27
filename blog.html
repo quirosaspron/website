@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Entries by Mateo Quiros Aspron.">
+    <title>Entries · Mateo Quiros Aspron</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=20261024-m">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root { --background: #f7f7f2; --foreground: #151515; --secondary: #716f69; --line: rgba(21,21,21,.24); --ui-font: "Inter", Arial, sans-serif; --display-font: Optima, "Optima Nova", "Segoe UI", Arial, sans-serif; }
+      body.dark { --background: #151515; --foreground: #f1efe9; --secondary: #a9a7a1; --line: rgba(241,239,233,.28); }
+      * { box-sizing: border-box; }
+      html { background: var(--background); scroll-behavior: smooth; }
+      body { margin: 0; min-height: 100vh; background: var(--background); color: var(--foreground); font: 14px/1.4 var(--ui-font); transition: background .18s, color .18s; }
+      a, button { color: inherit; font: inherit; }
+      a { text-decoration: none; }
+      button { cursor: pointer; }
+      .site-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 74px; padding: 0 max(28px, calc((100vw - 1100px) / 2)); border-bottom: 1px solid var(--line); }
+      .site-name { font: 400 18px/1 var(--display-font); letter-spacing: .2em; text-transform: uppercase; }
+      .header-actions { display: flex; align-items: center; gap: 22px; }
+      .back-link { color: var(--secondary); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+      .back-link:hover { color: var(--foreground); }
+      .theme-button { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: transparent; font-size: 16px; }
+      main { width: min(100% - 36px, 1200px); margin: 0 auto; }
+      .artwork { position: relative; height: min(43vh, 310px); min-height: 240px; margin: 8px 0 0; overflow: hidden; border-bottom: 1px solid var(--line); }
+      .life-art { position: absolute; inset: 0; touch-action: none; }
+      .life-art canvas { display: block; }
+      .life-controls { position: absolute; top: 4px; right: 4px; z-index: 2; display: flex; align-items: center; gap: 3px; padding: 3px; border-radius: 20px; background: var(--background); }
+      .life-controls button { display: grid; place-items: center; width: 29px; height: 29px; padding: 6px; border: 0; border-radius: 50%; background: transparent; color: var(--secondary); }
+      .life-controls button:hover, .life-controls button:focus-visible { background: var(--line); color: var(--foreground); }
+      .life-controls svg { display: block; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+      .life-controls .icon-play { display: none; }
+      .life-controls #life-play[aria-pressed="false"] .icon-play { display: block; }
+      .life-controls #life-play[aria-pressed="false"] .icon-pause { display: none; }
+      .entries { min-height: 67vh; padding: 24px 0 100px; }
+      .entries h1 { margin: 0 0 56px; font: 400 clamp(3rem, 7vw, 6.5rem)/1 var(--display-font); letter-spacing: .22em; text-transform: uppercase; }
+      .entries-status { padding: 24px 0; border-top: 1px solid var(--line); color: var(--secondary); font-size: 12px; }
+      footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px 0 42px; border-top: 1px solid var(--line); color: var(--secondary); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+      footer a:hover { color: var(--foreground); }
+      @media (max-width: 720px) {
+        .site-header { min-height: 68px; padding: 0 18px; }
+        .site-name { font-size: 13px; letter-spacing: .13em; }
+        .header-actions { gap: 12px; }
+        main { width: calc(100% - 36px); }
+        .artwork { height: min(36vh, 260px); min-height: 190px; margin-top: 8px; }
+        .entries { padding-top: 22px; }
+        .entries h1 { letter-spacing: .12em; }
+      }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="site-name" href="./index.html">Mateo Quiros Aspron</a>
+      <div class="header-actions">
+        <a class="back-link" href="./index.html">← Main site</a>
+        <button class="theme-button" id="life-theme" type="button" aria-label="Switch to dark mode">◐</button>
+      </div>
+    </header>
+    <main>
+      <div class="artwork" aria-label="Conway's Game of Life artwork">
+        <div class="life-art" id="life-art" role="img" aria-label="Animated Conway's Game of Life"></div>
+        <div class="life-controls" aria-label="Game of Life controls">
+          <button id="life-play" type="button" aria-label="Pause animation" aria-pressed="true">
+            <svg class="icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4v12M13 4v12"/></svg>
+            <svg class="icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6 3 10 7-10 7z"/></svg>
+          </button>
+          <button id="life-clear" type="button" aria-label="Clear animation">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M7 5V3h6v2M6 7l.7 9h6.6L14 7M9 9v5M11 9v5"/></svg>
+          </button>
+          <button id="life-random" type="button" aria-label="Randomize animation">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h2c3 0 5 10 8 10h4m-3-3 3 3-3 3M3 15h2c1.5 0 2.5-2.5 3.5-5M11.5 7c.5-1.2 1-2 2-2H17m-3-3 3 3-3 3"/></svg>
+          </button>
+        </div>
+      </div>
+      <section class="entries" aria-labelledby="entries-title">
+        <h1 id="entries-title">Entries</h1>
+        <p class="entries-status">No entries published yet.</p>
+      </section>
+      <footer><span>Mateo Quiros Aspron</span><a href="./index.html">Back to main site ↗</a></footer>
+    </main>
+    <script src="./assets/p5.js"></script>
+    <script type="module" src="./assets/life-preview.js"></script>
+  </body>
+</html>
