@@ -160,7 +160,7 @@
       .photo-pair .event-photo { height: auto; }
       body.dark .photo-pair .event-logo { filter: invert(1) hue-rotate(180deg); }
       .photo-large .photo-placeholder { width: 176px; height: 176px; }
-      .entry-card.above + .entry-media.polymath-figure { left: 72px; width: 224px; height: 224px; }
+      .entry-card.above + .entry-media.polymath-figure { top: calc(56% + 12px); left: 80px; width: min(278px, calc(44vh - 50px)); height: auto; aspect-ratio: 1; }
       .polymath-figure img { display: block; width: 100%; height: 100%; object-fit: contain; }
       .math-illustration img { display: block; width: 100%; height: 100%; object-fit: cover; }
       .entry-media.silverstone-photo { height: 170px; overflow: hidden; }
@@ -209,7 +209,8 @@
       .next-link-pending:disabled { opacity: 1; }
       .next-link-pending:hover span { color: var(--secondary); }
 
-      .back-button { position: fixed; top: 22px; left: 22px; z-index: 20; width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--foreground); background: var(--background); cursor: pointer; font-size: 20px; opacity: 0; pointer-events: none; transition: opacity 180ms ease; }
+      .back-button { position: fixed; top: 22px; left: 22px; z-index: 20; width: 42px; height: 42px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 50%; color: var(--foreground); background: var(--background); cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 180ms ease; }
+      .back-button svg { display: block; width: 20px; height: 20px; }
       .back-button.is-visible { opacity: 1; pointer-events: auto; }
       .left-nav.is-hidden { opacity: 0; pointer-events: none; transition: opacity 180ms ease; }
 
@@ -334,7 +335,7 @@
         </section>
       </main>
     </div>
-    <button class="back-button" id="back-to-start" type="button" aria-label="Go back to the beginning">←</button>
+    <button class="back-button" id="back-to-start" type="button" aria-label="Go back to the beginning"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 12H4m0 0 6-6m-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <dialog class="photo-zoom" id="photo-zoom" aria-label="Enlarged timeline photo"><button class="photo-zoom-close" type="button" aria-label="Close photo">×</button><img id="photo-zoom-image" alt=""></dialog>
     <div class="vertical-scroll-driver" aria-hidden="true"></div>
 
