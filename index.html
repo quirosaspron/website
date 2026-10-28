@@ -111,7 +111,7 @@
       body.dark .intro-handwriting img { filter: invert(1); }
 
       .portrait-panel { display: grid; place-items: center; padding: 8vh 9vw; }
-      .portrait-panel img { display: block; width: auto; height: min(70vh, 510px); max-width: min(62vw, 650px); object-fit: contain; filter: blur(var(--portrait-blur, 14px)); }
+      .portrait-placeholder { display: grid; place-items: center; width: min(62vw, 560px); height: min(70vh, 510px); border: 1px dashed var(--line); background: var(--placeholder); color: var(--secondary); font-size: 11px; letter-spacing: 0.08em; text-align: center; text-transform: uppercase; }
 
       .timeline-panel { width: var(--timeline-width, 4400px); flex-basis: var(--timeline-width, 4400px); padding-right: 7vw; }
       .timeline-panel::before { content: ""; position: absolute; top: calc(56% + 23.2px); right: 0; left: 6vw; height: 1px; background: var(--line); }
@@ -229,7 +229,7 @@
         .intro-attractor { top: 83px; left: 112px; width: calc(100vw - 112px); height: 350px; }
         .intro-handwriting { top: 275px; right: 12px; left: auto; width: min(45vw, 175px); }
         .portrait-panel { min-height: min(640px, 78svh); padding: 70px 10vw; }
-        .portrait-panel img { width: min(80vw, 420px); height: auto; max-width: 100%; }
+        .portrait-placeholder { width: min(80vw, 420px); height: auto; aspect-ratio: 2038 / 1856; }
         .intro-footer { display: block; }
         .intro-footer span { display: block; margin-bottom: 6px; }
         .timeline-panel { padding-bottom: 64px; }
@@ -266,7 +266,6 @@
         .intro-handwriting { top: 25vh; right: 3vw; left: auto; width: 28vw; }
       }
       @media (prefers-reduced-motion: reduce) {
-        .portrait-panel img { filter: none; }
         .timeline-entry { opacity: 1; transform: none; transition: none; }
         .timeline-entry .entry-media > img:not(.event-logo),
         .timeline-entry .entry-media > button { opacity: 1; filter: none; transform: none; transition: none; }
@@ -298,8 +297,8 @@
           </div>
         </section>
 
-        <section class="panel portrait-panel" aria-label="Portrait of Mateo Quiros Aspron">
-          <img src="./assets/mateo-portrait.webp" alt="Black and white portrait of Mateo Quiros Aspron" width="2038" height="1856" loading="lazy" decoding="async">
+        <section class="panel portrait-panel" aria-label="Portrait space">
+          <div class="portrait-placeholder">Portrait / insert later</div>
         </section>
 
         <section class="panel timeline-panel" id="timeline" aria-labelledby="timeline-title">
@@ -348,8 +347,6 @@
       const storageKey = 'mateo-site-theme';
       const photoZoom = document.querySelector('#photo-zoom');
       const photoZoomImage = document.querySelector('#photo-zoom-image');
-      const portraitImage = document.querySelector('.portrait-panel img');
-      const portraitReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
       document.querySelectorAll('.timeline-entry .entry-media img').forEach((img) => {
         const trigger = img.closest('button') || img;
@@ -403,29 +400,13 @@
           }
         });
       }
-      function updatePortraitFocus() {
-        if (portraitReducedMotion.matches) {
-          portraitImage.style.setProperty('--portrait-blur', '0px');
-          return;
-        }
-        const rect = portraitImage.getBoundingClientRect();
-        const mobile = window.matchMedia('(max-width: 720px)').matches;
-        const viewportSize = mobile ? window.innerHeight : viewport.clientWidth;
-        const imageSize = mobile ? rect.height : rect.width;
-        const imageStart = mobile ? rect.top : rect.left;
-        const clearStart = (viewportSize - imageSize) / 2 + imageSize * 0.45;
-        const progress = Math.min(1, Math.max(0, (viewportSize - imageStart) / Math.max(1, viewportSize - clearStart)));
-        portraitImage.style.setProperty('--portrait-blur', `${((1 - progress) * 14).toFixed(2)}px`);
-      }
       function syncHorizontalToVertical() {
         if (window.matchMedia('(max-width: 720px)').matches) {
-          updatePortraitFocus();
           revealTimelineEntries();
           return;
         }
         const progress = Math.min(1, Math.max(0, window.scrollY / maxVerticalScroll()));
         viewport.scrollLeft = maxHorizontalScroll() * progress;
-        updatePortraitFocus();
         backButton.classList.toggle('is-visible', progress > 0.04);
         leftNav.classList.toggle('is-hidden', progress > 0.04);
         revealTimelineEntries();
@@ -535,7 +516,6 @@
       backButton.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
       window.addEventListener('scroll', syncHorizontalToVertical, { passive: true });
       window.addEventListener('resize', resizeDriver);
-      portraitReducedMotion.addEventListener('change', updatePortraitFocus);
 
       document.querySelectorAll('.nav-link[href^="#"], .brand[href^="#"]').forEach((link) => link.addEventListener('click', (event) => {
         if (window.matchMedia('(max-width: 720px)').matches) return;
