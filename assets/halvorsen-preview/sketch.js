@@ -2,6 +2,7 @@ let a = 1.6;
 let dt = 0.01;
 let maxPoints = 1600;
 const PARTICLE_STEPS_PER_FRAME = 2;
+const mobileAttractor = window.matchMedia('(max-width: 900px)');
 let attractors = [];
 let center;
 let radius;
@@ -30,6 +31,7 @@ function setup() {
   const frame = document.getElementById('attractor');
   createCanvas(frame.clientWidth, frame.clientHeight, WEBGL).parent(frame);
   pixelDensity(1);
+  frameRate(mobileAttractor.matches ? 30 : 60);
   noLoop();
 
   tracerColor = color('#002FA7');
@@ -56,6 +58,7 @@ function setup() {
 function windowResized() {
   const frame = document.getElementById('attractor');
   resizeCanvas(frame.clientWidth, frame.clientHeight);
+  frameRate(mobileAttractor.matches ? 30 : 60);
   if (center && !isLooping()) redraw();
 }
 
@@ -84,14 +87,16 @@ function prepareBatch() {
 
 function draw() {
   if (!center) return;
+  const mobile = mobileAttractor.matches;
   background(document.body.classList.contains('dark') ? '#151515' : '#F7F7F2');
-  rotateY(frameCount * 0.0018);
-  rotateX(-0.2 + Math.sin(frameCount * 0.0011) * 0.12);
+  const motionFrame = mobile ? millis() * 0.06 : frameCount;
+  rotateY(motionFrame * 0.0018);
+  rotateX(-0.2 + Math.sin(motionFrame * 0.0011) * 0.12);
   scale(0.67 * Math.min(width, height) / radius);
   translate(-center.x, -center.y, -center.z);
 
   for (const attractor of attractors) {
-    for (let i = 0; i < PARTICLE_STEPS_PER_FRAME; i++) {
+    for (let i = 0; i < (mobile ? 4 : PARTICLE_STEPS_PER_FRAME); i++) {
       attractor.updateParticle();
     }
     attractor.display();

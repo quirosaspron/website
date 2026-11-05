@@ -65,7 +65,8 @@ class Attractor {
     stroke(this.c);
     strokeWeight(2.2);
     beginShape();
-    for (let i = 0; i < this.points.length; i += 3) {
+    const pathStride = mobileAttractor.matches ? 6 : 3;
+    for (let i = 0; i < this.points.length; i += pathStride) {
       const sample = this.points[i];
       vertex(sample.x, sample.y, sample.z);
     }
