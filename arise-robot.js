@@ -20,7 +20,7 @@ if (stage && entry) {
 
   function progress() {
     const box = entry.getBoundingClientRect();
-    if (innerWidth <= 720) {
+    if (innerWidth <= 900) {
       return clamp((innerHeight * 0.9 - box.top) / (innerHeight * 0.95 + box.height));
     }
     return clamp((innerWidth * 0.9 - box.left) / (innerWidth * 0.8 + box.width));
@@ -173,7 +173,7 @@ if (stage && entry) {
 
   function nearViewport() {
     const box = entry.getBoundingClientRect();
-    const horizontal = innerWidth > 720;
+    const horizontal = innerWidth > 900;
     return horizontal
       ? box.left < innerWidth * 1.6 && box.right > -innerWidth * 0.6
       : box.top < innerHeight * 1.6 && box.bottom > -innerHeight * 0.6;

@@ -216,58 +216,63 @@
 
       .vertical-scroll-driver { height: 100vh; }
 
-      @media (max-width: 720px) {
+      @media (max-width: 900px) {
+        html { scroll-behavior: smooth; }
         body { overflow-y: auto; }
-        .left-nav { position: absolute; width: 112px; padding: 18px 16px; }
         .horizontal-viewport { position: static; width: 100vw; height: auto; overflow: visible; }
         .horizontal-track { display: block; width: auto; min-width: 0; height: auto; }
-        .panel, .timeline-panel { width: auto; min-height: 0; height: auto; padding: 24px 24px 48px; border-right: 0; }
-        .intro-panel { padding-left: 136px; }
-        .intro-panel { min-height: max(820px, 100svh); }
-        .intro-grid { display: block; padding: 30px 0; }
-        .intro-copy { right: 15px; bottom: 40px; left: 136px; }
-        .intro-copy h1 { white-space: normal; font-size: 2rem; line-height: 1.16; letter-spacing: 0.12em; }
-        .intro-copy h1 span + span { margin-left: 0.24em; }
-        .intro-copy p { max-width: 390px; font-size: 10px; white-space: normal; }
-        .intro-attractor { top: 83px; left: 112px; width: calc(100vw - 112px); height: 350px; }
-        .intro-handwriting { top: 275px; right: 12px; left: auto; width: min(45vw, 175px); }
-        .portrait-panel { min-height: min(640px, 78svh); padding: 70px 10vw; }
-        .portrait-panel img { width: min(80vw, 420px); height: auto; max-width: 100%; }
-        .intro-footer { display: block; }
-        .intro-footer span { display: block; margin-bottom: 6px; }
-        .timeline-panel { padding-bottom: 64px; }
-        .timeline-entries { position: static; display: block; width: auto; padding-top: 45px; }
+        .panel, .timeline-panel { width: 100%; min-height: 0; height: auto; padding: 24px 24px 48px; border-right: 0; }
+        .intro-panel { min-height: 100svh; padding-top: 18px; }
+        .left-nav { position: relative; inset: auto; width: 100%; height: auto; flex-direction: row; align-items: center; padding: 0 0 14px; border-right: 0; border-bottom: 1px solid var(--line); background: transparent; }
+        .left-nav.is-hidden { opacity: 1; pointer-events: auto; }
+        .nav-list { position: static; flex-direction: row; flex-wrap: wrap; gap: clamp(10px, 3vw, 18px); transform: none; }
+        .nav-link { display: inline-flex; align-items: center; min-height: 40px; font-size: 9px; }
+        .theme-toggle { flex: 0 0 40px; width: 40px; height: 40px; margin: 0 0 0 8px; font-size: 16px; }
+        .intro-attractor { position: relative; top: auto; left: auto; width: 100%; height: clamp(280px, 44svh, 390px); margin: 14px 0 0; }
+        .intro-handwriting { display: none; }
+        .intro-grid { display: flex; align-items: flex-end; min-height: 0; padding: 22px 0 0; }
+        .intro-copy { position: static; width: 100%; }
+        .intro-copy h1 { margin-bottom: 28px; white-space: normal; font-size: clamp(2rem, 9vw, 3.1rem); line-height: 1.08; letter-spacing: 0.13em; }
+        .intro-copy h1 span { display: block; }
+        .intro-copy h1 span + span { margin-left: 0; }
+        .intro-copy p { max-width: 100%; margin-bottom: 9px; font-size: 10px; line-height: 1.5; white-space: normal; }
+        .portrait-panel { min-height: 76svh; padding: 60px 7vw; }
+        .portrait-panel img { width: min(100%, 470px); height: auto; max-height: 68svh; }
+        .timeline-panel { padding-top: 44px; padding-bottom: 64px; }
+        .timeline-title { max-width: 16ch; white-space: normal; font-size: clamp(1.85rem, 7vw, 2.5rem); line-height: 1.12; }
+        .timeline-entries { position: static; display: block; width: 100%; padding-top: 36px; }
         .timeline-panel::before { display: none; }
-        .timeline-entry { width: 100%; height: auto; min-height: 0; margin-bottom: 32px; }
-        .timeline-dot { top: 0; left: -31px; }
-        .timeline-entry { opacity: 1; transform: none; }
-        .entry-card, .entry-card.above, .entry-card.below { position: static; width: 100%; padding: 22px 0; border-top: 1px solid var(--line); display: block; }
+        .timeline-entry { width: 100%; height: auto; min-height: 0; margin-bottom: 44px; border-top: 1px solid var(--line); opacity: 1; transform: none; }
+        .timeline-dot { display: none; }
+        .entry-card, .entry-card.above, .entry-card.below { position: static; width: 100%; padding: 20px 0 0; border: 0; display: block; }
         .entry-card .entry-year, .entry-card.above .entry-year, .entry-card.below .entry-year { position: static; display: block; margin: 0 0 11px; padding: 0; background: transparent; text-align: left; transform: none; white-space: normal; }
         .entry-card.above::after, .entry-card.below::before { display: none; }
-        .entry-media, .entry-card.above + .entry-media, .entry-card.below + .entry-media { position: static; width: 176px; height: 176px; margin: 0 0 20px; }
-        .entry-card.above + .entry-media.photo-pair { display: flex; flex-direction: column; align-items: flex-start; width: min(100%, 340px); height: auto; gap: 12px; }
-        .entry-card.below + .entry-media.silverstone-photo { height: 170px; }
-        .entry-media.icpc-logo { width: min(238px, calc(100vw - 48px)); height: auto; aspect-ratio: 7 / 5; }
-        .entry-card.below + .entry-media.arise-robot { width: min(300px, calc(100vw - 48px)); height: 272px; }
+        .entry-card h3 { font-size: 24px; }
+        .entry-card p { font-size: 14px; }
+        .entry-facts { font-size: 13px; line-height: 1.5; }
+        .entry-media, .entry-card.above + .entry-media, .entry-card.below + .entry-media { position: static; width: min(100%, 360px); height: auto; margin: 20px 0 0; }
+        .entry-card.above + .entry-media.photo-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); width: min(100%, 360px); height: 170px; gap: 10px; }
+        .photo-pair .event-logo { width: 100%; height: 170px; }
+        .photo-pair .event-photo { width: 100%; height: 170px; object-fit: cover; }
+        .entry-card.below + .entry-media.silverstone-photo { width: min(100%, 360px); height: 230px; }
+        .entry-card.above + .entry-media.math-illustration { width: min(100%, 300px); aspect-ratio: 1; }
+        .entry-media.icpc-logo { width: min(100%, 260px); height: auto; aspect-ratio: 7 / 5; }
+        .entry-card.below + .entry-media.arise-robot { width: min(100%, 360px); height: 290px; }
         .entry-card.below + .entry-media.singapore-photos,
-        .entry-card.below + .entry-media.digital-twin-photos { width: min(248px, calc(100vw - 48px)); height: auto; aspect-ratio: 1; }
-        .entry-card.above + .entry-media.holberton-photos { width: min(100%, 332px); height: 176px; }
-        .entry-card.above + .entry-media.polymath-figure { width: min(100%, 320px); height: auto; aspect-ratio: 1; }
-        .photo-pair .event-logo, .photo-pair .event-photo { width: min(100%, 240px); }
-        .photo-pair .event-logo { height: 100px; }
-        .tetris-game { position: static; margin: 0 0 20px; }
-        .end-grid { display: block; padding: 90px 0; }
+        .entry-card.below + .entry-media.digital-twin-photos { width: min(100%, 360px); height: auto; aspect-ratio: 1; }
+        .entry-card.above + .entry-media.holberton-photos { width: min(100%, 360px); height: 210px; }
+        .entry-card.above + .entry-media.polymath-figure { width: min(100%, 360px); height: auto; aspect-ratio: 1; }
+        .tetris-game { position: static; margin: 20px 0 0; }
+        .end-panel { min-height: 70svh; }
+        .end-grid { display: block; padding: 60px 0; }
         .end-grid h2 { margin-bottom: 48px; }
-        .next-link { font-size: 18px; }
+        .next-link { align-items: flex-start; flex-direction: column; gap: 7px; font-size: 16px; overflow-wrap: anywhere; }
+        .next-link span { font-size: 11px; }
+        .back-button { top: 16px; right: 16px; left: auto; width: 44px; height: 44px; }
         .vertical-scroll-driver { display: none; }
       }
       @media (min-width: 1250px) {
         .intro-copy h1 { max-width: none; white-space: nowrap; }
-      }
-      @media (min-width: 721px) and (max-width: 900px) {
-        .intro-copy h1 { white-space: normal; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 0.12em; }
-        .intro-copy h1 span + span { margin-left: 0.24em; }
-        .intro-handwriting { top: 25vh; right: 3vw; left: auto; width: 28vw; }
       }
       @media (prefers-reduced-motion: reduce) {
         .portrait-panel img { filter: none; }
@@ -384,7 +389,7 @@
       function maxVerticalScroll() { return Math.max(1, document.documentElement.scrollHeight - window.innerHeight); }
       timelineEntryList.forEach((entry, index) => entry.style.setProperty('--entry-delay', `${Math.min(index, 5) * 70}ms`));
       function revealTimelineEntries() {
-        if (window.matchMedia('(max-width: 720px)').matches) {
+        if (window.matchMedia('(max-width: 900px)').matches) {
           timelineEntryList.forEach((entry) => {
             const entryRect = entry.getBoundingClientRect();
             entry.classList.toggle('is-visible', entryRect.top < window.innerHeight * 0.9 && entryRect.bottom > 0);
@@ -413,7 +418,7 @@
           return;
         }
         const rect = portraitImage.getBoundingClientRect();
-        const mobile = window.matchMedia('(max-width: 720px)').matches;
+        const mobile = window.matchMedia('(max-width: 900px)').matches;
         const viewportSize = mobile ? window.innerHeight : viewport.clientWidth;
         const imageSize = mobile ? rect.height : rect.width;
         const imageStart = mobile ? rect.top : rect.left;
@@ -422,8 +427,10 @@
         portraitImage.style.setProperty('--portrait-blur', `${((1 - progress) * 14).toFixed(2)}px`);
       }
       function syncHorizontalToVertical() {
-        if (window.matchMedia('(max-width: 720px)').matches) {
+        if (window.matchMedia('(max-width: 900px)').matches) {
           updatePortraitFocus();
+          backButton.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.65);
+          leftNav.classList.remove('is-hidden');
           revealTimelineEntries();
           return;
         }
@@ -435,7 +442,7 @@
         revealTimelineEntries();
       }
       function resizeTimeline() {
-        if (window.matchMedia('(max-width: 720px)').matches) return;
+        if (window.matchMedia('(max-width: 900px)').matches) return;
         const width = timelineEntries.scrollWidth + (window.innerWidth * 0.20);
         timelinePanel.style.setProperty('--timeline-width', `${width}px`);
       }
@@ -542,7 +549,7 @@
       portraitReducedMotion.addEventListener('change', updatePortraitFocus);
 
       document.querySelectorAll('.nav-link[href^="#"], .brand[href^="#"]').forEach((link) => link.addEventListener('click', (event) => {
-        if (window.matchMedia('(max-width: 720px)').matches) return;
+        if (window.matchMedia('(max-width: 900px)').matches) return;
         event.preventDefault();
         const target = document.querySelector(link.getAttribute('href'));
         const maxX = maxHorizontalScroll();
